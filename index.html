@@ -57,7 +57,9 @@
 
     <!-- Hero Section -->
     <section class="h-screen flex flex-col justify-center items-start px-6 md:px-32 max-w-5xl mx-auto">
+         <canvas id="particles" class="absolute inset-0 w-full h-full -z-10"></canvas>
         <p class="text-zinc-500 text-sm tracking-[0.2em] uppercase mb-4">CONVERGENCE</p>
+        
         <h1 class="text-5xl md:text-7xl font-bold leading-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-600">
             Software. <br>
             Neuroscience. <br>
@@ -304,4 +306,85 @@
     </footer>
 
 </body>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+
+let scene, camera, renderer, particles, particleArray = [];
+let mouseX = 0, mouseY = 0;
+
+const canvas = document.getElementById("particles");
+
+function init() {
+    scene = new THREE.Scene();
+
+    camera = new THREE.PerspectiveCamera(
+        75, 
+        window.innerWidth / window.innerHeight, 
+        1,
+        4000
+    );
+    camera.position.z = 1200;
+
+    renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        alpha: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    // PARTICLE GEOMETRY
+    const geometry = new THREE.BufferGeometry();
+    const positions = [];
+    const particleCount = 6000;
+
+    for (let i = 0; i < particleCount; i++) {
+        positions.push(
+            (Math.random() - 0.5) * 2500,
+            (Math.random() - 0.5) * 2500,
+            (Math.random() - 0.5) * 2500
+        );
+    }
+
+    geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(positions, 3)
+    );
+
+    const material = new THREE.PointsMaterial({
+        color: 0x8ab4f8,
+        size: 2,
+        transparent: true,
+        opacity: 0.9
+    });
+
+    particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    document.addEventListener("mousemove", (e) => {
+        mouseX = (e.clientX - window.innerWidth / 2) * 0.0005;
+        mouseY = (e.clientY - window.innerHeight / 2) * 0.0005;
+    });
+
+    animate();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    particles.rotation.x += 0.0003;
+    particles.rotation.y += 0.0004;
+
+    particles.rotation.x += mouseY * 0.05;
+    particles.rotation.y += mouseX * 0.05;
+
+    renderer.render(scene, camera);
+}
+
+window.addEventListener("resize", () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+});
+
+init();
+</script>
 </html>
